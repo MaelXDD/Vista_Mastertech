@@ -1,0 +1,92 @@
+<!-- src/app/modules/modules/productos/pages/lista-productos/lista-productos.component.html -->
+
+<!-- Navbar -->
+<nav class="navbar navbar-dark bg-dark px-3">
+  <span class="navbar-brand fw-bold">🎮 Mastertech</span>
+  <div class="d-flex align-items-center gap-3">
+
+    @if (authService.isLoggedIn()) {
+      <span class="text-light">Hola, {{ authService.currentUser()?.nombre }}</span>
+      <button class="btn btn-outline-light btn-sm" (click)="logout()">Cerrar sesión</button>
+    } @else {
+      <a routerLink="/auth/login" class="btn btn-outline-light btn-sm">Iniciar sesión</a>
+      <a routerLink="/auth/registro" class="btn btn-light btn-sm">Registrarse</a>
+    }
+
+  </div>
+</nav>
+
+<div class="container py-4">
+
+  <!-- Búsqueda -->
+  <div class="input-group mb-4">
+    <input
+      type="text"
+      class="form-control"
+      placeholder="Buscar productos..."
+      [(ngModel)]="busqueda"
+      (keyup.enter)="buscar()"
+    />
+    <button class="btn btn-primary" (click)="buscar()">Buscar</button>
+    <button class="btn btn-outline-secondary" (click)="cargarTodos()">Ver todos</button>
+  </div>
+
+  <!-- Filtros por categoría -->
+  <div class="d-flex flex-wrap gap-2 mb-4">
+    @for (cat of categorias; track cat.id) {
+      <button class="btn btn-outline-primary btn-sm" (click)="filtrarCategoria(cat.id)">
+        {{ cat.nombre }}
+      </button>
+    }
+  </div>
+
+  <!-- Error -->
+  @if (error()) {
+    <div class="alert alert-danger">{{ error() }}</div>
+  }
+
+  <!-- Loading -->
+  @if (loading()) {
+    <div class="text-center py-5">
+      <div class="spinner-border text-primary" role="status"></div>
+      <p class="mt-2 text-muted">Cargando productos...</p>
+    </div>
+  }
+
+  <!-- Grid de productos -->
+  @if (!loading() && !error()) {
+    @if (productos().length === 0) {
+      <div class="text-center py-5 text-muted">No se encontraron productos.</div>
+    } @else {
+      <div class="row row-cols-1 row-cols-sm-2 row-cols-md-3 row-cols-lg-4 g-4">
+        @for (p of productos(); track p.id) {
+          <div class="col">
+            <div class="card h-100 shadow-sm">
+              @if (p.imagenUrl) {
+                <img
+                  [src]="'http://localhost:8089' + p.imagenUrl"
+                  class="card-img-top"
+                  style="height: 180px; object-fit: cover;"
+                  [alt]="p.nombre"
+                  onerror="this.style.display='none'"
+                />
+              }
+              <div class="card-body d-flex flex-column">
+                <h6 class="card-title">{{ p.nombre }}</h6>
+                <p class="text-muted small mb-1">{{ p.marca }}</p>
+                <p class="card-text small flex-grow-1" style="max-height:60px; overflow:hidden;">
+                  {{ p.descripcion }}
+                </p>
+                <div class="d-flex justify-content-between align-items-center mt-2">
+                  <span class="fw-bold text-success">S/ {{ p.precio | number:'1.2-2' }}</span>
+                  <span class="badge bg-secondary">Stock: {{ p.stock }}</span>
+                </div>
+              </div>
+            </div>
+          </div>
+        }
+      </div>
+    }
+  }
+
+</div>
